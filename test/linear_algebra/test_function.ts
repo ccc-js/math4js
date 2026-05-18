@@ -2,7 +2,7 @@
  * Test linear algebra function module.
  */
 
-const {
+import {
   det,
   inverse_2x2,
   matrix_multiply,
@@ -10,7 +10,7 @@ const {
   matrix_scalar_mul,
   transpose,
   trace,
-} = require('../../src/math4js/linear_algebra/function.js');
+} from '../../src/math4js/linear_algebra/function.js';
 
 describe('det', () => {
   test('2x2 matrix', () => {

@@ -2,14 +2,14 @@
  * 區間估計測試
  */
 
-const {
+import {
   conf_interval,
   conf_interval_proportion,
   bootstrap_ci,
   conf_interval_variance,
-} = require('../../src/math4js/statistics/interval.js');
+} from '../../src/math4js/statistics/interval.js';
 
-const { mean } = require('../../src/math4js/statistics/function.js');
+import { mean } from '../../src/math4js/statistics/stats.js';
 
 describe('Confidence Interval', () => {
   test('returns valid structure', () => {

@@ -2,7 +2,7 @@
  * 分布函數測試
  */
 
-const {
+import {
   dnorm,
   pnorm,
   qnorm,
@@ -24,9 +24,8 @@ const {
   dpois,
   ppois,
   rpois,
-} = require('../../src/math4js/statistics/distributions.js');
-
-const { setSeed } = require('../../src/math4js/statistics/random.js');
+} from '../../src/math4js/statistics/distributions.js';
+import { setSeed } from '../../src/math4js/statistics/random.js';
 
 describe('Normal Distribution', () => {
   test('dnorm(0, 0, 1) is around 0.4', () => {

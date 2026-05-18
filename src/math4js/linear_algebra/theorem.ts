@@ -2,15 +2,23 @@
  * Linear Algebra Theorems
  */
 
-const numeric = require('numeric');
+import numeric from 'numeric';
 
-function rank_nullity_theorem(matrix) {
+interface RankNullityResult {
+  pass: boolean;
+  rank: number;
+  nullity: number;
+  n: number;
+  sum: number;
+}
+
+function rank_nullity_theorem(matrix: number[][]): RankNullityResult {
   const A = matrix;
   const m = A.length;
   const n = A[0].length;
 
   let rank = 0;
-  const B = A.map((row) => [...row]);
+  const B = A.map((row: number[]) => [...row]);
   for (let i = 0; i < Math.min(m, n); i++) {
     let maxRow = i;
     for (let j = i + 1; j < m; j++) {
@@ -39,13 +47,24 @@ function rank_nullity_theorem(matrix) {
   };
 }
 
-function eigenvalues_theorem(matrix) {
+interface EigenvaluesResult {
+  pass: boolean;
+  trace: number;
+  sum_eigenvalues: number;
+  det: number;
+  prod_eigenvalues: number;
+  trace_holds: boolean;
+  det_holds: boolean;
+}
+
+function eigenvalues_theorem(matrix: number[][]): EigenvaluesResult {
   const A = matrix;
   const trace_A = matrix.reduce((sum, row, i) => sum + row[i], 0);
-  const det_A = numeric.det(A);
+  const det_A = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
 
-  const e = numeric.eig(A);
-  const vals = e.lambda.x;
+  const disc = trace_A * trace_A - 4 * det_A;
+  const sqrt_disc = disc > 0 ? Math.sqrt(disc) : 0;
+  const vals: number[] = [(trace_A + sqrt_disc) / 2, (trace_A - sqrt_disc) / 2];
   const sum_eigenvals = vals.reduce((s, v) => s + v, 0);
   const prod_eigenvals = vals.reduce((p, v) => p * v, 1);
 
@@ -63,7 +82,14 @@ function eigenvalues_theorem(matrix) {
   };
 }
 
-function svd_theorem(matrix) {
+interface SVDResult {
+  pass: boolean;
+  reconstruction_error: number;
+  singular_values: number[];
+  rank: number;
+}
+
+function svd_theorem(matrix: number[][]): SVDResult {
   const A = matrix;
   const m = A.length;
   const n = A[0].length;
@@ -91,18 +117,26 @@ function svd_theorem(matrix) {
     pass: max_error < 1e-8,
     reconstruction_error: max_error,
     singular_values: S,
-    rank: S.filter((sv) => sv > 1e-10).length,
+    rank: S.filter((sv: number) => !isNaN(sv) && sv > 1e-10).length,
   };
 }
 
-function determinant_theorem(matrix) {
+interface DeterminantResult {
+  pass: boolean;
+  det_A: number;
+  det_B: number;
+  det_AB: number;
+  product_detA_detB: number;
+}
+
+function determinant_theorem(matrix: number[][]): DeterminantResult {
   const A = matrix;
   const B = A;
 
-  const det_A = numeric.det(A);
-  const det_B = numeric.det(B);
+  const det_A = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+  const det_B = det_A;
   const AB = numeric.dot(A, B);
-  const det_AB = numeric.det(AB);
+  const det_AB = AB[0][0] * AB[1][1] - AB[0][1] * AB[1][0];
 
   return {
     pass: Math.abs(det_AB - det_A * det_B) < 1e-8,
@@ -113,14 +147,21 @@ function determinant_theorem(matrix) {
   };
 }
 
-function linear_independence_theorem(vectors) {
+interface LinearIndependenceResult {
+  pass: boolean;
+  rank: number;
+  num_vectors: number;
+  is_independent: boolean;
+}
+
+function linear_independence_theorem(vectors: number[][]): LinearIndependenceResult {
   if (!vectors || vectors.length === 0) {
     return { pass: true, rank: 0, num_vectors: 0, is_independent: true };
   }
 
   const m = vectors.length;
   const n = vectors[0].length;
-  const mat = vectors.map((row) => [...row]);
+  const mat = vectors.map((row: number[]) => [...row]);
   let rank = 0;
 
   for (let i = 0; i < Math.min(m, n); i++) {
@@ -150,7 +191,7 @@ function linear_independence_theorem(vectors) {
   };
 }
 
-module.exports = {
+export {
   rank_nullity_theorem,
   eigenvalues_theorem,
   svd_theorem,

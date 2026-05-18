@@ -2,13 +2,13 @@
  * Test linear algebra theorems module.
  */
 
-const {
+import {
   rank_nullity_theorem,
   eigenvalues_theorem,
   svd_theorem,
   determinant_theorem,
   linear_independence_theorem,
-} = require('../../src/math4js/linear_algebra/theorem.js');
+} from '../../src/math4js/linear_algebra/theorem.js';
 
 describe('Rank Nullity Theorem', () => {
   test('full rank square', () => {

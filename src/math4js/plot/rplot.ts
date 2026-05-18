@@ -5,15 +5,15 @@
  * 支援 PNG/PDF 輸出（Node.js）或螢幕顯示（瀏覽器）
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 const OUT_DIR = path.join(__dirname, '..', '..', 'out');
 
-let _traces = [];
-let _layout = {};
-let _device = null;
-let _device_params = {};
+let _traces: object[] = [];
+let _layout: Record<string, unknown> = {};
+let _device: string | null = null;
+let _device_params: Record<string, unknown> = {};
 
 const PALETTE = [
   '#2196F3',
@@ -26,12 +26,12 @@ const PALETTE = [
   '#607D8B',
 ];
 
-function _normalize_x(x) {
+function _normalize_x(x: number | number[]): number[] {
   if (typeof x === 'number') return [x];
   return Array.isArray(x) ? x : [...x];
 }
 
-function _norm_inv(p) {
+function _norm_inv(p: number): number {
   const a1 = -3.969683028665376e1;
   const a2 = 2.209460984245205e2;
   const a3 = -2.759285104469687e2;
@@ -55,7 +55,8 @@ function _norm_inv(p) {
   const d4 = 3.754408661907416;
   const pLow = 0.02425;
   const pHigh = 1 - pLow;
-  let q, r;
+  let q: number;
+  let r: number;
   if (p < pLow) {
     q = Math.sqrt(-2 * Math.log(p));
     return (
@@ -80,32 +81,32 @@ function _norm_inv(p) {
   }
 }
 
-function png(filename, options = {}) {
+function png(filename: string, options: Record<string, unknown> = {}): void {
   if (_traces.length > 0) dev_off();
   _device = 'png';
   _device_params = { filename, ...options };
 }
 
-function pdf(filename, options = {}) {
+function pdf(filename: string, options: Record<string, unknown> = {}): void {
   if (_traces.length > 0) dev_off();
   _device = 'pdf';
   _device_params = { filename, ...options };
 }
 
-function dev_off() {
+function dev_off(): void {
   if (_traces.length === 0) return;
   _save_figure();
   _reset();
 }
 
-function _reset() {
+function _reset(): void {
   _traces = [];
   _layout = {};
   _device = null;
   _device_params = {};
 }
 
-function _save_figure() {
+function _save_figure(): void {
   if (typeof window !== 'undefined') {
     _save_html_inline();
     return;
@@ -113,18 +114,21 @@ function _save_figure() {
   _save_html_node();
 }
 
-function _save_html_node() {
+function _save_html_node(): void {
   const html = _build_html();
-  let filepath = _device_params.filename;
+  let filepath = _device_params.filename as string;
   if (!path.isAbsolute(filepath) && !filepath.includes(':')) {
     filepath = path.join(OUT_DIR, filepath);
   }
-  fs.mkdirSync(path.dirname(filepath), { recursive: true });
+  const dir = path.dirname(filepath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
   fs.writeFileSync(filepath, html);
   console.log(`Saved: ${filepath}`);
 }
 
-function _build_html() {
+function _build_html(): string {
   const data = JSON.stringify(_traces);
   const layout = JSON.stringify(_layout);
   return `<!DOCTYPE html>
@@ -142,7 +146,7 @@ function _build_html() {
 </html>`;
 }
 
-function _save_html_inline() {
+function _save_html_inline(): void {
   if (typeof document === 'undefined') return;
   const data = JSON.stringify(_traces);
   const layout = JSON.stringify(_layout);
@@ -160,22 +164,47 @@ function _save_html_inline() {
   container.innerHTML = html;
 }
 
-function plot(x, y, options = {}) {
+interface PlotOptions {
+  type?: string;
+  col?: string;
+  ms?: number;
+  lwd?: number;
+  name?: string;
+  main?: string;
+  xlab?: string;
+  ylab?: string;
+  xlim?: [number, number];
+  ylim?: [number, number];
+  showlegend?: boolean;
+  breaks?: number;
+  border?: string;
+  freq?: boolean;
+  names?: string[];
+  showpoints?: boolean;
+  auto?: boolean;
+}
+
+function plot(
+  x: number | number[],
+  y?: number | number[] | PlotOptions,
+  options: PlotOptions = {}
+): object {
   if (typeof y === 'object' && y !== null && !Array.isArray(y)) {
     options = y;
     y = undefined;
   }
-  let xArr, yArr;
+  let xArr: number[];
+  let yArr: number[];
   if (y === undefined) {
-    yArr = _normalize_x(x);
+    yArr = _normalize_x(x as number[]);
     xArr = yArr.map((_, i) => i);
   } else {
-    xArr = _normalize_x(x);
-    yArr = _normalize_x(y);
+    xArr = _normalize_x(x as number[]);
+    yArr = _normalize_x(y as number[]);
   }
   const type = options.type || 'p';
   const col = options.col || PALETTE[_traces.length % PALETTE.length];
-  let trace;
+  let trace: object;
   if (type === 'p') {
     trace = {
       x: xArr,
@@ -209,8 +238,8 @@ function plot(x, y, options = {}) {
   return trace;
 }
 
-function hist(x, options = {}) {
-  const xArr = _normalize_x(x);
+function hist(x: number | number[], options: PlotOptions = {}): object {
+  const xArr = _normalize_x(x as number[]);
   const col = options.col || PALETTE[_traces.length % PALETTE.length];
   const trace = {
     x: xArr,
@@ -224,11 +253,15 @@ function hist(x, options = {}) {
   return trace;
 }
 
-function boxplot(data, options = {}) {
-  let dataArr =
-    Array.isArray(data) && typeof data[0] === 'number' ? [data] : data.map((d) => _normalize_x(d));
+function boxplot(data: number[] | number[][], options: PlotOptions = {}): object[] {
+  let dataArr: number[][];
+  if (Array.isArray(data) && typeof data[0] === 'number') {
+    dataArr = [data as number[]];
+  } else {
+    dataArr = (data as number[][]).map((d: number[]) => _normalize_x(d));
+  }
   const col = options.col || PALETTE[_traces.length % PALETTE.length];
-  const traces = dataArr.map((d, i) => ({
+  const traces = dataArr.map((d: number[], i: number) => ({
     y: d,
     type: 'box',
     name: (options.names && options.names[i]) || `Group ${i + 1}`,
@@ -239,15 +272,15 @@ function boxplot(data, options = {}) {
   return traces;
 }
 
-function qqnorm(x, options = {}) {
-  const xArr = _normalize_x(x);
+function qqnorm(x: number | number[], options: PlotOptions = {}): object[] {
+  const xArr = _normalize_x(x as number[]);
   const sorted = [...xArr].sort((a, b) => a - b);
   const n = sorted.length;
   const p = sorted.map((_, i) => (i + 0.5) / n);
   const theoretical = p.map((pi) => _norm_inv(Math.max(0.0001, Math.min(0.9999, pi))));
-  const mean = sorted.reduce((a, b) => a + b, 0) / n;
-  const std = Math.sqrt(sorted.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1));
-  const sampleStd = sorted.map((v) => (v - mean) / std);
+  const meanVal = sorted.reduce((a, b) => a + b, 0) / n;
+  const std = Math.sqrt(sorted.reduce((a, b) => a + (b - meanVal) ** 2, 0) / (n - 1));
+  const sampleStd = sorted.map((v) => (v - meanVal) / std);
   const col = options.col || PALETTE[0];
   const trace = {
     x: theoretical,
@@ -272,24 +305,24 @@ function qqnorm(x, options = {}) {
   return [trace, lineTrace];
 }
 
-function _add_trace(trace, options = {}) {
+function _add_trace(trace: object, options: PlotOptions = {}): void {
   _traces.push(trace);
   if (options.main) _layout.title = options.main;
-  if (options.xlab) _layout.xaxis = { ..._layout.xaxis, title: options.xlab };
-  if (options.ylab) _layout.yaxis = { ..._layout.yaxis, title: options.ylab };
-  if (options.xlim) _layout.xaxis = { ..._layout.xaxis, range: options.xlim };
-  if (options.ylim) _layout.yaxis = { ..._layout.yaxis, range: options.ylim };
+  if (options.xlab) _layout.xaxis = { ...(_layout.xaxis || {}), title: options.xlab };
+  if (options.ylab) _layout.yaxis = { ...(_layout.yaxis || {}), title: options.ylab };
+  if (options.xlim) _layout.xaxis = { ...(_layout.xaxis || {}), range: options.xlim };
+  if (options.ylim) _layout.yaxis = { ...(_layout.yaxis || {}), range: options.ylim };
   if (options.showlegend !== undefined) _layout.showlegend = options.showlegend;
   if (_device !== null && _device_params.auto !== false) {
     if (_traces.length >= 1) dev_off();
   }
 }
 
-function clear() {
+function clear(): void {
   if (typeof document !== 'undefined') {
     const container = document.getElementById('math4js-plot-output');
     if (container) container.innerHTML = '';
   }
 }
 
-module.exports = { plot, hist, boxplot, qqnorm, png, pdf, dev_off, clear };
+export { plot, hist, boxplot, qqnorm, png, pdf, dev_off, clear };

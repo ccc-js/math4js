@@ -4,18 +4,18 @@
  * 實作 Z 檢定、t 檢定、卡方檢定、變異數分析等假設檢定函數
  */
 
-const { pt, qt, pf, pchisq, qchisq, qnorm } = require('./distributions.js');
-const { mean, variance } = require('./function.js');
+import { pt, qt, pf, pchisq, qchisq, qnorm } from './distributions.js';
+import { mean, variance } from './stats.js';
 
-/**
- * Z 檢定：檢驗樣本均值是否與假設均值有顯著差異
- * @param {number[]} x - 樣本資料
- * @param {number} mu0 - 假設的母體均值
- * @param {number} sigma - 母體標準差（已知）
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function z_test(x, mu0, sigma, alpha = 0.05) {
+interface ZTestResult {
+  statistic: number;
+  p_value: number;
+  reject: boolean;
+  alpha: number;
+  ci: [number, number];
+}
+
+function z_test(x: number[], mu0: number, sigma: number, alpha: number = 0.05): ZTestResult {
   const n = x.length;
   const xbar = mean(x);
   const se = sigma / Math.sqrt(n);
@@ -24,21 +24,26 @@ function z_test(x, mu0, sigma, alpha = 0.05) {
 
   return {
     statistic: z,
-    p_value: p_value,
+    p_value,
     reject: p_value < alpha,
-    alpha: alpha,
+    alpha,
     ci: [xbar - qnorm(1 - alpha / 2) * se, xbar + qnorm(1 - alpha / 2) * se],
   };
 }
 
-/**
- * 單樣本 t 檢定
- * @param {number[]} x - 樣本資料
- * @param {number} mu0 - 假設的母體均值
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function t_test(x, mu0 = 0, alpha = 0.05) {
+interface TTestResult {
+  statistic: number;
+  df: number;
+  p_value: number;
+  reject: boolean;
+  alpha: number;
+  mean: number;
+  se: number;
+  t_crit: number;
+  ci: [number, number];
+}
+
+function t_test(x: number[], mu0: number = 0, alpha: number = 0.05): TTestResult {
   const n = x.length;
   const xbar = mean(x);
   const s = Math.sqrt(variance(x));
@@ -52,24 +57,17 @@ function t_test(x, mu0 = 0, alpha = 0.05) {
   return {
     statistic: t_stat,
     df: df_n,
-    p_value: p_value,
+    p_value,
     reject: p_value < alpha,
-    alpha: alpha,
+    alpha,
     mean: xbar,
-    se: se,
-    t_crit: t_crit,
+    se,
+    t_crit,
     ci: [xbar - t_crit * se, xbar + t_crit * se],
   };
 }
 
-/**
- * 雙樣本 t 檢定（假設變異數相等）
- * @param {number[]} x1 - 樣本 1
- * @param {number[]} x2 - 樣本 2
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function t_test_two(x1, x2, alpha = 0.05) {
+function t_test_two(x1: number[], x2: number[], alpha: number = 0.05): TTestResult {
   const n1 = x1.length;
   const n2 = x2.length;
   const x1bar = mean(x1);
@@ -88,36 +86,31 @@ function t_test_two(x1, x2, alpha = 0.05) {
   return {
     statistic: t_stat,
     df: df_n,
-    p_value: p_value,
+    p_value,
     reject: p_value < alpha,
-    alpha: alpha,
-    mean_diff: x1bar - x2bar,
-    se: se,
-    t_crit: t_crit,
+    alpha,
+    mean: x1bar - x2bar,
+    se,
+    t_crit,
     ci: [x1bar - x2bar - t_crit * se, x1bar - x2bar + t_crit * se],
   };
 }
 
-/**
- * 配對 t 檢定
- * @param {number[]} x1 - 配對樣本 1
- * @param {number[]} x2 - 配對樣本 2
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function t_test_paired(x1, x2, alpha = 0.05) {
+function t_test_paired(x1: number[], x2: number[], alpha: number = 0.05): TTestResult {
   const diff = x1.map((v, i) => v - x2[i]);
   return t_test(diff, 0, alpha);
 }
 
-/**
- * 卡方檢定（適合度檢定）
- * @param {number[]} observed - 觀測值
- * @param {number[]} expected - 期望值
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function chisq_test(observed, expected, alpha = 0.05) {
+interface ChiSqTestResult {
+  statistic: number;
+  df: number;
+  p_value: number;
+  reject: boolean;
+  alpha: number;
+  chi_crit: number;
+}
+
+function chisq_test(observed: number[], expected: number[], alpha: number = 0.05): ChiSqTestResult {
   if (observed.length !== expected.length) {
     throw new Error('observed and expected must have same length');
   }
@@ -136,20 +129,31 @@ function chisq_test(observed, expected, alpha = 0.05) {
   return {
     statistic: chi_sq,
     df: df_n,
-    p_value: p_value,
+    p_value,
     reject: p_value < alpha,
-    alpha: alpha,
-    chi_crit: chi_crit,
+    alpha,
+    chi_crit,
   };
 }
 
-/**
- * 單因子變異數分析 (One-way ANOVA)
- * @param {number[][]} groups - 各組的資料
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function anova(groups, alpha = 0.05) {
+interface AnovaResult {
+  statistic: number;
+  df_between: number;
+  df_within: number;
+  df_total: number;
+  ss_between: number;
+  ss_within: number;
+  ss_total: number;
+  ms_between: number;
+  ms_within: number;
+  p_value: number;
+  reject: boolean;
+  alpha: number;
+  group_means: number[];
+  grand_mean: number;
+}
+
+function anova(groups: number[][], alpha: number = 0.05): AnovaResult {
   if (groups.length < 2) {
     throw new Error('Need at least 2 groups');
   }
@@ -161,7 +165,7 @@ function anova(groups, alpha = 0.05) {
 
   let ss_between = 0;
   let ss_total = 0;
-  const group_means = [];
+  const group_means: number[] = [];
 
   for (let i = 0; i < groups.length; i++) {
     const g_mean = mean(groups[i]);
@@ -191,29 +195,26 @@ function anova(groups, alpha = 0.05) {
     df_between: df_b,
     df_within: df_w,
     df_total: df_t,
-    ss_between: ss_between,
-    ss_within: ss_within,
-    ss_total: ss_total,
-    ms_between: ms_between,
-    ms_within: ms_within,
-    p_value: p_value,
+    ss_between,
+    ss_within,
+    ss_total,
+    ms_between,
+    ms_within,
+    p_value,
     reject: p_value < alpha,
-    alpha: alpha,
-    group_means: group_means,
-    grand_mean: grand_mean,
+    alpha,
+    group_means,
+    grand_mean,
   };
 }
 
-/**
- * 標準常態分布 CDF
- */
-function normalCdf(x) {
-  const a1 = 0.254829592,
-    a2 = -0.284496736,
-    a3 = 1.421413741;
-  const a4 = -1.453152027,
-    a5 = 1.061405429,
-    p = 0.3275911;
+function normalCdf(x: number): number {
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
   const sign = x < 0 ? -1 : 1;
   x = Math.abs(x) / Math.SQRT2;
   const t = 1 / (1 + p * x);
@@ -221,11 +222,4 @@ function normalCdf(x) {
   return 0.5 * (1 + sign * y);
 }
 
-module.exports = {
-  z_test,
-  t_test,
-  t_test_two,
-  t_test_paired,
-  chisq_test,
-  anova,
-};
+export { z_test, t_test, t_test_two, t_test_paired, chisq_test, anova };

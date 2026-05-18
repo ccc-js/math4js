@@ -2,17 +2,17 @@
  * 假設檢定測試
  */
 
-const {
+import {
   z_test,
   t_test,
   t_test_two,
   t_test_paired,
   chisq_test,
   anova,
-} = require('../../src/math4js/statistics/hypothesis.js');
+} from '../../src/math4js/statistics/hypothesis.js';
 
-const { setSeed } = require('../../src/math4js/statistics/random.js');
-const { rnorm } = require('../../src/math4js/statistics/distributions.js');
+import { setSeed } from '../../src/math4js/statistics/random.js';
+import { rnorm } from '../../src/math4js/statistics/distributions.js';
 
 describe('Z Test', () => {
   test('returns valid result structure', () => {
@@ -67,7 +67,7 @@ describe('Two-Sample T Test', () => {
     const result = t_test_two(x1, x2, 0.05);
     expect(result).toHaveProperty('statistic');
     expect(result).toHaveProperty('df');
-    expect(result).toHaveProperty('mean_diff');
+    expect(result).toHaveProperty('mean');
   });
 
   test('similar samples should not reject', () => {

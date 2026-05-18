@@ -2,11 +2,11 @@
  * 矩陣運算函數
  */
 
-function det(matrix) {
+function det(matrix: number[][]): number {
   return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
 }
 
-function inverse_2x2(matrix) {
+function inverse_2x2(matrix: number[][]): number[][] {
   const d = det(matrix);
   if (Math.abs(d) < 1e-10) {
     throw new Error('Singular matrix');
@@ -22,13 +22,13 @@ function inverse_2x2(matrix) {
   ];
 }
 
-function matrix_multiply(A, B) {
+function matrix_multiply(A: number[][], B: number[][]): number[][] {
   const m = A.length;
   const n = A[0].length;
   const p = B[0].length;
-  const result = [];
+  const result: number[][] = [];
   for (let i = 0; i < m; i++) {
-    const row = [];
+    const row: number[] = [];
     for (let j = 0; j < p; j++) {
       let sum = 0;
       for (let k = 0; k < n; k++) {
@@ -41,12 +41,12 @@ function matrix_multiply(A, B) {
   return result;
 }
 
-function matrix_add(A, B) {
+function matrix_add(A: number[][], B: number[][]): number[][] {
   const nrows = A.length;
   const ncols = A[0].length;
-  const result = [];
+  const result: number[][] = [];
   for (let i = 0; i < nrows; i++) {
-    const row = [];
+    const row: number[] = [];
     for (let j = 0; j < ncols; j++) {
       row.push(A[i][j] + B[i][j]);
     }
@@ -55,16 +55,16 @@ function matrix_add(A, B) {
   return result;
 }
 
-function matrix_scalar_mul(A, scalar) {
+function matrix_scalar_mul(A: number[][], scalar: number): number[][] {
   return A.map((row) => row.map((val) => scalar * val));
 }
 
-function transpose(A) {
+function transpose(A: number[][]): number[][] {
   const nrows = A.length;
   const ncols = A[0].length;
-  const result = [];
+  const result: number[][] = [];
   for (let j = 0; j < ncols; j++) {
-    const row = [];
+    const row: number[] = [];
     for (let i = 0; i < nrows; i++) {
       row.push(A[i][j]);
     }
@@ -73,7 +73,7 @@ function transpose(A) {
   return result;
 }
 
-function trace(A) {
+function trace(A: number[][]): number {
   const n = Math.min(A.length, A[0].length);
   let sum = 0;
   for (let i = 0; i < n; i++) {
@@ -82,12 +82,4 @@ function trace(A) {
   return sum;
 }
 
-module.exports = {
-  det,
-  inverse_2x2,
-  matrix_multiply,
-  matrix_add,
-  matrix_scalar_mul,
-  transpose,
-  trace,
-};
+export { det, inverse_2x2, matrix_multiply, matrix_add, matrix_scalar_mul, transpose, trace };

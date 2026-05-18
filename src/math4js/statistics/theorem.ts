@@ -4,26 +4,35 @@
  * 實作中央極限定理、大數定律、Chebyshev 不等式等統計定理的驗證函數
  */
 
-const { random } = require('./random.js');
-const { mean, variance, std } = require('./function.js');
+import { random } from './random.js';
+import { mean, variance, sd } from './stats.js';
 
-/**
- * 中央極限定理：樣本均值趨近 N(μ, σ²/n)
- * @param {function} sampleFn - 產生樣本的函數
- * @param {number} trueMean - 真實均值
- * @param {number} trueVar - 真實變異數
- * @param {number} n - 樣本大小
- * @param {number} nSamples - 抽樣次數
- * @returns {object}
- */
-function central_limit_theorem(sampleFn, trueMean, trueVar, n, nSamples = 1000) {
-  const sampleMeans = [];
+type SampleFn = (n: number) => number[];
+
+interface CLResult {
+  pass: boolean;
+  expected_mean: number;
+  observed_mean: number;
+  mean_error: number;
+  expected_se: number;
+  observed_se: number;
+  se_error: number;
+}
+
+function central_limit_theorem(
+  sampleFn: SampleFn,
+  trueMean: number,
+  trueVar: number,
+  n: number,
+  nSamples: number = 1000
+): CLResult {
+  const sampleMeans: number[] = [];
   for (let i = 0; i < nSamples; i++) {
     sampleMeans.push(mean(sampleFn(n)));
   }
   const expectedSE = Math.sqrt(trueVar / n);
   const observedMean = mean(sampleMeans);
-  const observedSE = std(sampleMeans);
+  const observedSE = sd(sampleMeans);
 
   const meanError = Math.abs(observedMean - trueMean);
   const seError = Math.abs(observedSE - expectedSE);
@@ -42,14 +51,15 @@ function central_limit_theorem(sampleFn, trueMean, trueVar, n, nSamples = 1000) 
   };
 }
 
-/**
- * 大數定律：樣本均值收斂到真實均值
- * @param {function} sampleFn
- * @param {number} trueMean
- * @param {number} n
- * @returns {object}
- */
-function law_of_large_numbers(sampleFn, trueMean, n) {
+interface LLNResult {
+  pass: boolean;
+  true_mean: number;
+  sample_mean: number;
+  error: number;
+  relative_error: number;
+}
+
+function law_of_large_numbers(sampleFn: SampleFn, trueMean: number, n: number): LLNResult {
   const sampleMean = mean(sampleFn(n));
   const error = Math.abs(sampleMean - trueMean);
   const relativeError = trueMean !== 0 ? error / Math.abs(trueMean) : error;
@@ -58,36 +68,37 @@ function law_of_large_numbers(sampleFn, trueMean, n) {
     pass: relativeError < 0.1,
     true_mean: trueMean,
     sample_mean: sampleMean,
-    error: error,
+    error,
     relative_error: relativeError,
   };
 }
 
-/**
- * Chebyshev 不等式：P(|X-μ| ≥ kσ) ≤ 1/k²
- * @param {number} var
- * @param {number} k
- * @returns {object}
- */
-function chebyshev_inequality(var_, k) {
+interface ChebyshevResult {
+  pass: boolean;
+  bound: number;
+  k: number;
+}
+
+function chebyshev_inequality(var_: number, k: number): ChebyshevResult {
   const bound = 1.0 / k ** 2;
   return {
     pass: true,
-    bound: bound,
-    k: k,
+    bound,
+    k,
   };
 }
 
-/**
- * 驗證 Chebyshev 不等式於實際樣本
- * @param {number[]} samples
- * @param {number} k
- * @returns {object}
- */
-function chebyshev_verify(samples, k) {
+interface ChebyshevVerifyResult {
+  pass: boolean;
+  observed_prob?: number;
+  bound?: number;
+  note?: string;
+}
+
+function chebyshev_verify(samples: number[], k: number): ChebyshevVerifyResult {
   if (samples.length === 0) return { pass: true, note: 'no samples' };
   const mu = mean(samples);
-  const sigma = std(samples);
+  const sigma = sd(samples);
 
   if (sigma === 0) return { pass: true, note: 'zero variance' };
 
@@ -97,40 +108,44 @@ function chebyshev_verify(samples, k) {
   return {
     pass: violations <= bound,
     observed_prob: violations,
-    bound: bound,
+    bound,
   };
 }
 
-/**
- * Markov 不等式：P(X ≥ k) ≤ E[X]/k
- * @param {number[]} x
- * @returns {object}
- */
-function markov_inequality(x) {
+interface MarkovResult {
+  pass: boolean;
+  k?: number;
+  prob?: number;
+  bound?: number;
+  note?: string;
+}
+
+function markov_inequality(x: number[]): MarkovResult {
   const mu = mean(x);
   if (mu <= 0) return { pass: true, note: 'mean <= 0' };
 
   for (const k of [mu * 0.5, mu, mu * 2]) {
     const prob = x.filter((xi) => xi >= k).length / x.length;
     if (prob > mu / k) {
-      return { pass: false, k: k, prob: prob, bound: mu / k };
+      return { pass: false, k, prob, bound: mu / k };
     }
   }
 
   return { pass: true };
 }
 
-/**
- * 驗證 Markov 不等式於實際樣本
- * @param {number[]} samples
- * @returns {object}
- */
-function markov_verify(samples) {
+interface MarkovVerifyResult {
+  pass: boolean;
+  violations?: boolean[];
+  note?: string;
+}
+
+function markov_verify(samples: number[]): MarkovVerifyResult {
   const mu = mean(samples);
 
   if (mu <= 0) return { pass: true, note: 'mean <= 0' };
 
-  const violations = [];
+  const violations: boolean[] = [];
   for (const k of [mu * 0.5, mu, mu * 1.5, mu * 2]) {
     if (k > 0) {
       const obsProb = samples.filter((x) => x >= k).length / samples.length;
@@ -139,18 +154,19 @@ function markov_verify(samples) {
     }
   }
 
-  return { pass: violations.every((v) => v), violations: violations };
+  return { pass: violations.every((v) => v), violations };
 }
 
-/**
- * Bernoulli 試驗驗證
- * @param {number} n - 試驗次數
- * @param {number} p - 成功機率
- * @param {number} nSamples - 抽樣次數
- * @returns {object}
- */
-function bernoulli_verify(n, p, nSamples = 1000) {
-  const experiments = [];
+interface BernoulliVerifyResult {
+  pass: boolean;
+  expected_mean: number;
+  observed_mean: number;
+  expected_var: number;
+  observed_var: number;
+}
+
+function bernoulli_verify(n: number, p: number, nSamples: number = 1000): BernoulliVerifyResult {
+  const experiments: number[] = [];
   for (let i = 0; i < nSamples; i++) {
     let successes = 0;
     for (let j = 0; j < n; j++) {
@@ -175,36 +191,38 @@ function bernoulli_verify(n, p, nSamples = 1000) {
   };
 }
 
-/**
- * 貝氏定理：P(A|B) = P(B|A) P(A) / P(B)
- * @param {number} pA
- * @param {number} pBgivenA
- * @param {number} pB
- * @returns {object}
- */
-function bayes_theorem(pA, pBgivenA, pB) {
+interface BayesTheoremResult {
+  pass: boolean;
+  prior: number;
+  p_b_given_a: number;
+  p_b: number;
+  posterior: number;
+}
+
+function bayes_theorem(pA: number, pBgivenA: number, pB: number): BayesTheoremResult {
   const posterior = (pBgivenA * pA) / pB;
   return {
     pass: true,
     prior: pA,
     p_b_given_a: pBgivenA,
     p_b: pB,
-    posterior: posterior,
+    posterior,
   };
 }
 
-/**
- * 驗證貝氏定理
- * @param {number[]} prior
- * @param {number[]} likelihood
- * @returns {object}
- */
-function bayes_verify(prior, likelihood) {
+interface BayesVerifyResult {
+  pass: boolean;
+  prior: number[];
+  expected_posterior: number[];
+  note?: string;
+}
+
+function bayes_verify(prior: number[], likelihood: number[]): BayesVerifyResult {
   const priorSum = prior.reduce((a, b) => a + b, 0);
   const likelihoodSum = likelihood.reduce((a, b) => a + b, 0);
 
   if (priorSum === 0 || likelihoodSum === 0) {
-    return { pass: true, note: 'zero sum' };
+    return { pass: true, note: 'zero sum', prior: [], expected_posterior: [] };
   }
 
   const priorNorm = prior.map((p) => p / priorSum);
@@ -220,13 +238,12 @@ function bayes_verify(prior, likelihood) {
   };
 }
 
-/**
- * 資訊熵：H(X) = -Σ p(x) log(p(x))
- * @param {number[]} p
- * @param {number} base
- * @returns {object}
- */
-function information_entropy(p, base = 2.0) {
+interface InformationEntropyResult {
+  pass: boolean;
+  entropy: number;
+}
+
+function information_entropy(p: number[], base: number = 2.0): InformationEntropyResult {
   const pNorm = p.map((pi) => pi / p.reduce((a, b) => a + b, 0));
   const entropy = -pNorm
     .filter((pi) => pi > 0)
@@ -234,19 +251,24 @@ function information_entropy(p, base = 2.0) {
 
   return {
     pass: true,
-    entropy: entropy,
+    entropy,
   };
 }
 
-/**
- * 驗證資訊熵性質
- * @param {number[]} p
- * @param {number} base
- * @returns {object}
- */
-function information_entropy_verify(p, base = 2.0) {
+interface InformationEntropyVerifyResult {
+  pass: boolean;
+  entropy: number;
+  min: number;
+  max: number;
+  note?: string;
+}
+
+function information_entropy_verify(
+  p: number[],
+  base: number = 2.0
+): InformationEntropyVerifyResult {
   const pSum = p.reduce((a, b) => a + b, 0);
-  if (pSum === 0) return { pass: true, note: 'zero sum' };
+  if (pSum === 0) return { pass: true, note: 'zero sum', entropy: 0, min: 0, max: 0 };
 
   const pNorm = p.map((pi) => pi / pSum);
   const entropy = -pNorm
@@ -257,19 +279,20 @@ function information_entropy_verify(p, base = 2.0) {
 
   return {
     pass: minEntropy <= entropy && entropy <= maxEntropy,
-    entropy: entropy,
+    entropy,
     min: minEntropy,
     max: maxEntropy,
   };
 }
 
-/**
- * 互資訊：I(X;Y) = H(X) + H(Y) - H(X,Y)
- * @param {number[]} x
- * @param {number[]} y
- * @returns {object}
- */
-function mutual_information(x, y) {
+interface MutualInfoResult {
+  pass: boolean;
+  mi: number;
+  h_x: number;
+  h_y: number;
+}
+
+function mutual_information(x: number[], y: number[]): MutualInfoResult {
   const xSum = x.reduce((a, b) => a + b, 0);
   const ySum = y.reduce((a, b) => a + b, 0);
 
@@ -280,10 +303,10 @@ function mutual_information(x, y) {
   const hY = -py.filter((p) => p > 0).reduce((sum, p) => sum + p * Math.log(p), 0);
   const mi = hX + hY;
 
-  return { pass: true, mi: mi, h_x: hX, h_y: hY };
+  return { pass: true, mi, h_x: hX, h_y: hY };
 }
 
-module.exports = {
+export {
   central_limit_theorem,
   law_of_large_numbers,
   chebyshev_inequality,

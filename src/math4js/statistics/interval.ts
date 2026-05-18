@@ -4,20 +4,24 @@
  * 信賴區間、Bootstrap 區間估計
  */
 
-const { mean, variance, std } = require('./function.js');
-const { random } = require('./random.js');
-const { qt, qnorm, qchisq } = require('./distributions.js');
+import { qt, qnorm, qchisq } from './distributions.js';
+import { mean, variance, sd } from './stats.js';
+import { random } from './random.js';
 
-/**
- * 平均值信賴區間（使用 t 分布）
- * @param {number[]} x - 樣本資料
- * @param {number} alpha - 顯著水準（預設 0.05 即 95% 信賴區間）
- * @returns {object}
- */
-function conf_interval(x, alpha = 0.05) {
+interface ConfIntervalResult {
+  lower: number;
+  upper: number;
+  mean: number;
+  se: number;
+  alpha: number;
+  confidence: number;
+  df?: number;
+}
+
+function conf_interval(x: number[], alpha: number = 0.05): ConfIntervalResult {
   const n = x.length;
   const xbar = mean(x);
-  const s = std(x);
+  const s = sd(x);
   const se = s / Math.sqrt(n);
   const t_crit = qt(1 - alpha / 2, n - 1);
 
@@ -25,21 +29,27 @@ function conf_interval(x, alpha = 0.05) {
     lower: xbar - t_crit * se,
     upper: xbar + t_crit * se,
     mean: xbar,
-    se: se,
-    alpha: alpha,
+    se,
+    alpha,
     confidence: 1 - alpha,
     df: n - 1,
   };
 }
 
-/**
- * 比例信賴區間（使用 Z 分布）
- * @param {number} x - 成功次數
- * @param {number} n - 總試驗次數
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function conf_interval_proportion(x, n, alpha = 0.05) {
+interface ConfIntervalProportionResult {
+  lower: number;
+  upper: number;
+  proportion: number;
+  se: number;
+  alpha: number;
+  confidence: number;
+}
+
+function conf_interval_proportion(
+  x: number,
+  n: number,
+  alpha: number = 0.05
+): ConfIntervalProportionResult {
   const p_hat = x / n;
   const z_crit = qnorm(1 - alpha / 2);
   const se = Math.sqrt((p_hat * (1 - p_hat)) / n);
@@ -48,22 +58,30 @@ function conf_interval_proportion(x, n, alpha = 0.05) {
     lower: p_hat - z_crit * se,
     upper: p_hat + z_crit * se,
     proportion: p_hat,
-    se: se,
-    alpha: alpha,
+    se,
+    alpha,
     confidence: 1 - alpha,
   };
 }
 
-/**
- * Bootstrap 信賴區間
- * @param {number[]} x - 原始資料
- * @param {function} statisticFn - 統計量函數
- * @param {number} nBootstrap - Bootstrap 次數（預設 1000）
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function bootstrap_ci(x, statisticFn, nBootstrap = 1000, alpha = 0.05) {
-  const stats = [];
+type StatisticFn = (x: number[]) => number;
+
+interface BootstrapCIResult {
+  lower: number;
+  upper: number;
+  statistic: number;
+  alpha: number;
+  confidence: number;
+  n_bootstrap: number;
+}
+
+function bootstrap_ci(
+  x: number[],
+  statisticFn: StatisticFn,
+  nBootstrap: number = 1000,
+  alpha: number = 0.05
+): BootstrapCIResult {
+  const stats: number[] = [];
   for (let i = 0; i < nBootstrap; i++) {
     const resampled = x.map(() => x[Math.floor(random() * x.length)]);
     stats.push(statisticFn(resampled));
@@ -77,19 +95,22 @@ function bootstrap_ci(x, statisticFn, nBootstrap = 1000, alpha = 0.05) {
     lower: stats[lower_idx],
     upper: stats[upper_idx],
     statistic: statisticFn(x),
-    alpha: alpha,
+    alpha,
     confidence: 1 - alpha,
     n_bootstrap: nBootstrap,
   };
 }
 
-/**
- * 變異數信賴區間
- * @param {number[]} x - 樣本資料
- * @param {number} alpha - 顯著水準
- * @returns {object}
- */
-function conf_interval_variance(x, alpha = 0.05) {
+interface ConfIntervalVarianceResult {
+  lower: number;
+  upper: number;
+  variance: number;
+  alpha: number;
+  confidence: number;
+  df: number;
+}
+
+function conf_interval_variance(x: number[], alpha: number = 0.05): ConfIntervalVarianceResult {
   const n = x.length;
   const s_sq = variance(x);
   const df_n = n - 1;
@@ -104,15 +125,10 @@ function conf_interval_variance(x, alpha = 0.05) {
     lower: Math.min(lower, upper),
     upper: Math.max(lower, upper),
     variance: s_sq,
-    alpha: alpha,
+    alpha,
     confidence: 1 - alpha,
     df: df_n,
   };
 }
 
-module.exports = {
-  conf_interval,
-  conf_interval_proportion,
-  bootstrap_ci,
-  conf_interval_variance,
-};
+export { conf_interval, conf_interval_proportion, bootstrap_ci, conf_interval_variance };

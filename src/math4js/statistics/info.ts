@@ -4,13 +4,7 @@
  * 實作熵、交叉熵、KL 散度、互資訊等資訊理論函數
  */
 
-/**
- * 計算熵 (Entropy)
- * @param {number[]} p - 機率分布
- * @param {number} base - 對數底數（預設 2）
- * @returns {number}
- */
-function entropy(p, base = 2) {
+function entropy(p: number[], base: number = 2): number {
   const pSum = p.reduce((a, b) => a + b, 0);
   if (pSum === 0) return 0;
 
@@ -24,14 +18,7 @@ function entropy(p, base = 2) {
   return h;
 }
 
-/**
- * 計算交叉熵 (Cross Entropy)
- * @param {number[]} p - 真實分布
- * @param {number[]} q - 預測分布
- * @param {number} base - 對數底數
- * @returns {number}
- */
-function cross_entropy(p, q, base = 2) {
+function cross_entropy(p: number[], q: number[], base: number = 2): number {
   const pSum = p.reduce((a, b) => a + b, 0);
   const qSum = q.reduce((a, b) => a + b, 0);
   if (pSum === 0 || qSum === 0) return 0;
@@ -48,15 +35,7 @@ function cross_entropy(p, q, base = 2) {
   return h;
 }
 
-/**
- * 計算 KL 散度 (Kullback-Leibler Divergence)
- * D(P || Q) = Σ P(x) log(P(x) / Q(x))
- * @param {number[]} p - 真實分布
- * @param {number[]} q - 預測分布
- * @param {number} base - 對數底數
- * @returns {number}
- */
-function kl_divergence(p, q, base = 2) {
+function kl_divergence(p: number[], q: number[], base: number = 2): number {
   const pSum = p.reduce((a, b) => a + b, 0);
   const qSum = q.reduce((a, b) => a + b, 0);
   if (pSum === 0 || qSum === 0) return 0;
@@ -73,20 +52,12 @@ function kl_divergence(p, q, base = 2) {
   return kl;
 }
 
-/**
- * 計算互資訊 (Mutual Information)
- * I(X;Y) = H(X) + H(Y) - H(X,Y)
- * @param {number[]} x
- * @param {number[]} y
- * @param {number} base - 對數底數
- * @returns {number}
- */
-function mutual_information(x, y, base = 2) {
-  const joint = x.map((xi, i) => [xi, y[i]]);
+function mutual_information(x: number[], y: number[], base: number = 2): number {
+  const joint = x.map((xi, i) => [xi, y[i]] as [number, number]);
 
-  const xCount = {};
-  const yCount = {};
-  const jointCount = {};
+  const xCount: Record<string, number> = {};
+  const yCount: Record<string, number> = {};
+  const jointCount: Record<string, number> = {};
 
   for (const [xi, yi] of joint) {
     xCount[xi] = (xCount[xi] || 0) + 1;
@@ -96,9 +67,9 @@ function mutual_information(x, y, base = 2) {
   }
 
   const n = joint.length;
-  let h_x = 0,
-    h_y = 0,
-    h_xy = 0;
+  let h_x = 0;
+  let h_y = 0;
+  let h_xy = 0;
 
   for (const key in xCount) {
     const p = xCount[key] / n;
@@ -118,19 +89,11 @@ function mutual_information(x, y, base = 2) {
   return h_x + h_y - h_xy;
 }
 
-/**
- * 計算條件熵 (Conditional Entropy)
- * H(Y|X) = -Σ Σ P(x,y) log(P(y|x))
- * @param {number[]} x
- * @param {number[]} y
- * @param {number} base - 對數底數
- * @returns {number}
- */
-function conditional_entropy(x, y, base = 2) {
-  const joint = x.map((xi, i) => [xi, y[i]]);
+function conditional_entropy(x: number[], y: number[], base: number = 2): number {
+  const joint = x.map((xi, i) => [xi, y[i]] as [number, number]);
 
-  const xCount = {};
-  const jointCount = {};
+  const xCount: Record<string, number> = {};
+  const jointCount: Record<string, number> = {};
 
   for (const [xi, yi] of joint) {
     xCount[xi] = (xCount[xi] || 0) + 1;
@@ -154,20 +117,12 @@ function conditional_entropy(x, y, base = 2) {
   return h_y_given_x;
 }
 
-/**
- * 計算點間互資訊 (PMI)
- * PMI(x, y) = log(P(x,y) / (P(x) * P(y)))
- * @param {number[]} x
- * @param {number[]} y
- * @param {number} base - 對數底數
- * @returns {number}
- */
-function pmi(x, y, base = 2) {
-  const joint = x.map((xi, i) => [xi, y[i]]);
+function pmi(x: number[], y: number[], base: number = 2): number {
+  const joint = x.map((xi, i) => [xi, y[i]] as [number, number]);
 
-  const xCount = {};
-  const yCount = {};
-  const jointCount = {};
+  const xCount: Record<string, number> = {};
+  const yCount: Record<string, number> = {};
+  const jointCount: Record<string, number> = {};
 
   for (const [xi, yi] of joint) {
     xCount[xi] = (xCount[xi] || 0) + 1;
@@ -177,7 +132,6 @@ function pmi(x, y, base = 2) {
   }
 
   const n = joint.length;
-
   let total_pmi = 0;
   let count = 0;
 
@@ -197,11 +151,4 @@ function pmi(x, y, base = 2) {
   return count > 0 ? total_pmi / count : 0;
 }
 
-module.exports = {
-  entropy,
-  cross_entropy,
-  kl_divergence,
-  mutual_information,
-  conditional_entropy,
-  pmi,
-};
+export { entropy, cross_entropy, kl_divergence, mutual_information, conditional_entropy, pmi };

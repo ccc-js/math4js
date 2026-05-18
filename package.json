@@ -2,12 +2,13 @@
   "name": "math4js",
   "version": "0.1.0",
   "description": "A JavaScript/Node.js math library",
-  "main": "src/math4js/__init__.js",
+  "main": "src/math4js/index.js",
   "scripts": {
     "test": "jest",
     "lint": "eslint src test",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc"
   },
   "keywords": [
     "math",
@@ -18,9 +19,13 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.5.12",
+    "@types/node": "^25.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
     "prettier": "^3.2.5",
+    "ts-jest": "^29.4.9",
     "typescript": "^5.4.0"
   },
   "dependencies": {
@@ -29,12 +34,16 @@
     "plotly.js": "^3.5.1"
   },
   "jest": {
+    "preset": "ts-jest",
     "testEnvironment": "node",
     "testMatch": [
-      "**/test/**/*.js"
+      "**/test/**/*.ts"
     ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
     "collectCoverageFrom": [
-      "src/**/*.js"
+      "src/**/*.ts"
     ]
   },
   "eslintConfig": {

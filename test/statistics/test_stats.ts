@@ -2,7 +2,7 @@
  * 敘述統計測試
  */
 
-const {
+import {
   mean,
   median,
   variance,
@@ -13,7 +13,7 @@ const {
   iqr,
   summary,
   range_stat,
-} = require('../../src/math4js/statistics/stats.js');
+} from '../../src/math4js/statistics/stats.js';
 
 describe('Descriptive Statistics', () => {
   test('mean of [1, 2, 3, 4, 5] = 3', () => {

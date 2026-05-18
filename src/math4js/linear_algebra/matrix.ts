@@ -2,79 +2,103 @@
  * Matrix 類別，包裝 numeric.js 提供一致 API
  */
 
-const numeric = require('numeric');
+import numeric from 'numeric';
+
+interface EigResult {
+  values: number[];
+  vectors: Matrix;
+}
+
+interface SVDResult {
+  U: Matrix;
+  S: number[];
+  V: Matrix;
+}
+
+interface QRResult {
+  Q: Matrix;
+  R: Matrix;
+}
+
+interface LUResult {
+  L: Matrix;
+  U: Matrix;
+  P: Matrix;
+}
 
 class Matrix {
-  constructor(data) {
+  private _data: number[][];
+
+  constructor(data: Matrix | number[][] | number[]) {
     if (data instanceof Matrix) {
-      this._data = data._data.map((row) => [...row]);
+      this._data = data._data.map((row: number[]) => [...row]);
     } else if (Array.isArray(data)) {
       if (data.length === 0) {
         this._data = [];
       } else if (typeof data[0] === 'number') {
-        this._data = data.map((v) => [v]);
+        this._data = (data as number[]).map((v: number) => [v]);
       } else {
-        this._data = data.map((row) => [...row]);
+        this._data = (data as number[][]).map((row: number[]) => [...row]);
       }
     } else {
       throw new Error('Matrix: invalid data');
     }
   }
 
-  get shape() {
+  get shape(): [number, number] {
     return [this._data.length, this._data[0].length];
   }
 
-  get T() {
+  get T(): Matrix {
     return new Matrix(numeric.transpose(this._data));
   }
 
-  add(other) {
+  add(other: Matrix | number | number[][]): Matrix {
     if (other instanceof Matrix) {
       return new Matrix(numeric.add(this._data, other._data));
     }
     return new Matrix(numeric.add(this._data, other));
   }
 
-  sub(other) {
+  sub(other: Matrix | number | number[][]): Matrix {
     if (other instanceof Matrix) {
       return new Matrix(numeric.sub(this._data, other._data));
     }
     return new Matrix(numeric.sub(this._data, other));
   }
 
-  mul(other) {
+  mul(other: Matrix | number | number[][]): Matrix {
     if (other instanceof Matrix) {
       return new Matrix(numeric.mul(this._data, other._data));
     }
     return new Matrix(numeric.mul(this._data, other));
   }
 
-  matmul(other) {
+  matmul(other: Matrix | number[][]): Matrix {
     return this.dot(other);
   }
 
-  dot(other) {
+  dot(other: Matrix | number[][]): Matrix {
     if (other instanceof Matrix) {
       return new Matrix(numeric.dot(this._data, other._data));
     }
     return new Matrix(numeric.dot(this._data, other));
   }
 
-  inv() {
+  inv(): Matrix {
     return new Matrix(numeric.inv(this._data));
   }
 
-  det() {
+  det(): number {
     return numeric.det(this._data);
   }
 
-  eigvals() {
+  eigvals(): number[] {
     const e = numeric.eig(this._data);
     return e.lambda.x;
   }
 
-  eig() {
+  eig(): EigResult {
     const e = numeric.eig(this._data);
     return {
       values: e.lambda.x,
@@ -82,7 +106,7 @@ class Matrix {
     };
   }
 
-  svd() {
+  svd(): SVDResult {
     const s = numeric.svd(this._data);
     return {
       U: new Matrix(s.U),
@@ -91,12 +115,13 @@ class Matrix {
     };
   }
 
-  qr() {
+  qr(): QRResult {
     const A = this._data;
     const m = A.length;
     const n = A[0].length;
     const Q = numeric.identity(m);
-    const R = A.map((row) => [...row]);
+    const R = A.map((row: number[]) => [...row]);
+
     for (let j = 0; j < Math.min(n, m - 1); j++) {
       let norm = 0;
       for (let i = j; i < m; i++) {
@@ -104,15 +129,18 @@ class Matrix {
       }
       norm = Math.sqrt(norm);
       if (norm < 1e-10) continue;
+
       const sign = R[j][j] >= 0 ? 1 : -1;
-      const u = [];
+      const u: number[] = [];
       for (let i = j; i < m; i++) {
         u.push(R[i][j] + sign * (i === j ? norm : 0));
       }
       const uNorm = Math.sqrt(u.reduce((s, v) => s + v * v, 0));
       if (uNorm < 1e-10) continue;
+
       const uNormArr = u.map((v) => v / uNorm);
-      for (let k = 0; k < m; k++) {
+
+      for (let k = 0; k < n; k++) {
         let dot = 0;
         for (let i = j; i < m; i++) {
           dot += uNormArr[i - j] * R[i][k];
@@ -120,6 +148,9 @@ class Matrix {
         for (let i = j; i < m; i++) {
           R[i][k] -= 2 * dot * uNormArr[i - j];
         }
+      }
+
+      for (let k = 0; k < m; k++) {
         let dotQ = 0;
         for (let i = j; i < m; i++) {
           dotQ += uNormArr[i - j] * Q[i][k];
@@ -129,24 +160,28 @@ class Matrix {
         }
       }
     }
+
     return { Q: new Matrix(Q), R: new Matrix(R) };
   }
 
-  lu() {
+  lu(): LUResult {
     const A = this._data;
     const n = A.length;
     const L = numeric.identity(n);
-    const U = A.map((row) => [...row]);
+    const U = A.map((row: number[]) => [...row]);
     const P = numeric.identity(n);
+
     for (let j = 0; j < n - 1; j++) {
       let maxRow = j;
       for (let i = j + 1; i < n; i++) {
         if (Math.abs(U[i][j]) > Math.abs(U[maxRow][j])) maxRow = i;
       }
       if (Math.abs(U[maxRow][j]) < 1e-10) continue;
+
       [U[j], U[maxRow]] = [U[maxRow], U[j]];
       [P[j], P[maxRow]] = [P[maxRow], P[j]];
       [L[j], L[maxRow]] = [L[maxRow], L[j]];
+
       for (let i = j + 1; i < n; i++) {
         L[i][j] = U[i][j] / U[j][j];
         for (let k = j; k < n; k++) {
@@ -154,26 +189,31 @@ class Matrix {
         }
       }
     }
+
     return { L: new Matrix(L), U: new Matrix(U), P: new Matrix(P) };
   }
 
-  solve(b) {
-    let bData = b;
+  solve(b: Matrix | number[] | number[][]): Matrix {
+    let bData: number[][];
     if (b instanceof Matrix) {
       bData = b._data;
     } else if (Array.isArray(b) && b.length > 0) {
       if (typeof b[0] === 'number') {
-        bData = b.map((v) => [v]);
+        bData = (b as number[]).map((v: number) => [v]);
+      } else {
+        bData = b as number[][];
       }
+    } else {
+      throw new Error('solve: invalid b');
     }
     const x = numeric.solve(this._data, bData);
     return new Matrix(x);
   }
 
-  rank() {
+  rank(): number {
     const m = this._data.length;
     const n = this._data[0].length;
-    const B = this._data.map((row) => [...row]);
+    const B = this._data.map((row: number[]) => [...row]);
     let rank = 0;
     for (let i = 0; i < Math.min(m, n); i++) {
       let maxRow = i;
@@ -192,38 +232,35 @@ class Matrix {
     return rank;
   }
 
-  norm(ord = 2) {
+  norm(ord: number | string = 2): number {
     if (ord === 2 || ord === 'fro') {
       const s = numeric.svd(this._data);
       return s.S[0];
     }
-    if (ord === 1 || ord === Infinity) {
-      return numeric.norminf(this._data);
-    }
     return numeric.norminf(this._data);
   }
 
-  toArray() {
-    return this._data.map((row) => [...row]);
+  toArray(): number[][] {
+    return this._data.map((row: number[]) => [...row]);
   }
 
-  static eye(n) {
+  static eye(n: number): Matrix {
     return new Matrix(numeric.identity(n));
   }
 
-  static zeros(shape) {
+  static zeros(shape: [number, number]): Matrix {
     return new Matrix(numeric.rep(shape, 0));
   }
 
-  static ones(shape) {
+  static ones(shape: [number, number]): Matrix {
     return new Matrix(numeric.rep(shape, 1));
   }
 
-  static random(shape, low = -1, high = 1) {
+  static random(shape: [number, number], low: number = -1, high: number = 1): Matrix {
     const [rows, cols] = shape;
-    const data = [];
+    const data: number[][] = [];
     for (let i = 0; i < rows; i++) {
-      const row = [];
+      const row: number[] = [];
       for (let j = 0; j < cols; j++) {
         row.push(low + Math.random() * (high - low));
       }
@@ -232,7 +269,7 @@ class Matrix {
     return new Matrix(data);
   }
 
-  static diag(values) {
+  static diag(values: number[]): Matrix {
     const n = values.length;
     const data = numeric.rep([n, n], 0);
     for (let i = 0; i < n; i++) {
@@ -241,17 +278,17 @@ class Matrix {
     return new Matrix(data);
   }
 
-  static fromArray(arr) {
+  static fromArray(arr: number[][]): Matrix {
     return new Matrix(arr);
   }
 
-  toString() {
+  toString(): string {
     return numeric.prettyPrint(this._data);
   }
 
-  [Symbol.iterator]() {
+  [Symbol.iterator](): Iterator<number[]> {
     return this._data[Symbol.iterator]();
   }
 }
 
-module.exports = { Matrix };
+export { Matrix, type EigResult, type SVDResult, type QRResult, type LUResult };

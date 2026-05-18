@@ -2,14 +2,14 @@
  * 資訊理論測試
  */
 
-const {
+import {
   entropy,
   cross_entropy,
   kl_divergence,
   mutual_information,
   conditional_entropy,
   pmi,
-} = require('../../src/math4js/statistics/info.js');
+} from '../../src/math4js/statistics/info.js';
 
 describe('Entropy', () => {
   test('entropy of uniform distribution', () => {

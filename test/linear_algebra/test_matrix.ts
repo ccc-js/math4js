@@ -2,11 +2,11 @@
  * Test linear algebra matrix module.
  */
 
-const lm = require('../../src/math4js/linear_algebra/matrix.js');
+import { Matrix } from '../../src/math4js/linear_algebra/matrix.js';
 
 describe('Matrix Creation', () => {
   test('from list', () => {
-    const m = new lm.Matrix([
+    const m = new Matrix([
       [1, 2],
       [3, 4],
     ]);
@@ -14,14 +14,14 @@ describe('Matrix Creation', () => {
   });
 
   test('eye identity matrix', () => {
-    const m = lm.Matrix.eye(3);
+    const m = Matrix.eye(3);
     expect(m.shape).toEqual([3, 3]);
     expect(m.toArray()[0][0]).toBe(1);
     expect(m.toArray()[1][1]).toBe(1);
   });
 
   test('zeros', () => {
-    const m = lm.Matrix.zeros([2, 3]);
+    const m = Matrix.zeros([2, 3]);
     expect(m.shape).toEqual([2, 3]);
     expect(m.toArray()[0][0]).toBe(0);
   });
@@ -29,11 +29,11 @@ describe('Matrix Creation', () => {
 
 describe('Matrix Operations', () => {
   test('add', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
-    const B = new lm.Matrix([
+    const B = new Matrix([
       [10, 20],
       [30, 40],
     ]);
@@ -42,11 +42,11 @@ describe('Matrix Operations', () => {
   });
 
   test('sub', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
-    const B = new lm.Matrix([
+    const B = new Matrix([
       [1, 1],
       [1, 1],
     ]);
@@ -55,11 +55,11 @@ describe('Matrix Operations', () => {
   });
 
   test('mul (element-wise)', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
-    const B = new lm.Matrix([
+    const B = new Matrix([
       [2, 2],
       [2, 2],
     ]);
@@ -69,11 +69,11 @@ describe('Matrix Operations', () => {
   });
 
   test('dot (matrix multiply)', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
-    const B = new lm.Matrix([
+    const B = new Matrix([
       [5, 6],
       [7, 8],
     ]);
@@ -82,7 +82,7 @@ describe('Matrix Operations', () => {
   });
 
   test('transpose', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2, 3],
       [4, 5, 6],
     ]);
@@ -92,7 +92,7 @@ describe('Matrix Operations', () => {
   });
 
   test('det', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
@@ -100,7 +100,7 @@ describe('Matrix Operations', () => {
   });
 
   test('inv', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
@@ -110,11 +110,11 @@ describe('Matrix Operations', () => {
   });
 
   test('solve', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 1],
       [1, -1],
     ]);
-    const b = new lm.Matrix([[5], [1]]);
+    const b = new Matrix([[5], [1]]);
     const x = A.solve(b);
     expect(x.toArray()[0][0]).toBeCloseTo(3, 5);
     expect(x.toArray()[1][0]).toBeCloseTo(2, 5);
@@ -123,7 +123,7 @@ describe('Matrix Operations', () => {
 
 describe('Matrix Decomposition', () => {
   test('qr', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
@@ -133,7 +133,7 @@ describe('Matrix Decomposition', () => {
   });
 
   test('svd', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
@@ -144,7 +144,7 @@ describe('Matrix Decomposition', () => {
   });
 
   test('lu', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 2],
       [3, 4],
     ]);
@@ -155,7 +155,7 @@ describe('Matrix Decomposition', () => {
   });
 
   test('eigvals', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [2, 0],
       [0, 3],
     ]);
@@ -164,7 +164,7 @@ describe('Matrix Decomposition', () => {
   });
 
   test('eig', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [2, 0],
       [0, 3],
     ]);
@@ -173,7 +173,7 @@ describe('Matrix Decomposition', () => {
   });
 
   test('rank', () => {
-    const A = new lm.Matrix([
+    const A = new Matrix([
       [1, 0],
       [0, 1],
     ]);

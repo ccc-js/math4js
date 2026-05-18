@@ -2,11 +2,11 @@
  * Test linear algebra vector module.
  */
 
-const {
+import {
   norm_vector,
   dot_product,
   cross_product,
-} = require('../../src/math4js/linear_algebra/vector.js');
+} from '../../src/math4js/linear_algebra/vector.js';
 
 describe('Norm Vector', () => {
   test('2D vector', () => {
