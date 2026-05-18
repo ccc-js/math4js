@@ -3,12 +3,27 @@
  */
 
 const {
-  dnorm, pnorm, qnorm, rnorm,
-  dt, pt, qt, rt,
-  dchisq, pchisq, qchisq, rchisq,
-  df, pf, rf,
-  dbinom, pbinom, rbinom,
-  dpois, ppois, rpois,
+  dnorm,
+  pnorm,
+  qnorm,
+  rnorm,
+  dt,
+  pt,
+  qt,
+  rt,
+  dchisq,
+  pchisq,
+  qchisq,
+  rchisq,
+  df,
+  pf,
+  rf,
+  dbinom,
+  pbinom,
+  rbinom,
+  dpois,
+  ppois,
+  rpois,
 } = require('../../src/math4js/statistics/distributions.js');
 
 const { setSeed } = require('../../src/math4js/statistics/random.js');
@@ -96,7 +111,7 @@ describe('Chi-square Distribution', () => {
     setSeed(123);
     const samples = rchisq(100, 5);
     expect(samples).toHaveLength(100);
-    expect(samples.every(x => x >= 0)).toBe(true);
+    expect(samples.every((x) => x >= 0)).toBe(true);
   });
 });
 
@@ -113,7 +128,7 @@ describe('F Distribution', () => {
     setSeed(123);
     const samples = rf(100, 5, 10);
     expect(samples).toHaveLength(100);
-    expect(samples.every(x => x > 0)).toBe(true);
+    expect(samples.every((x) => x > 0)).toBe(true);
   });
 });
 
@@ -132,7 +147,7 @@ describe('Binomial Distribution', () => {
     setSeed(123);
     const samples = rbinom(100, 10, 0.5);
     expect(samples).toHaveLength(100);
-    expect(samples.every(x => Number.isInteger(x) && x >= 0 && x <= 10)).toBe(true);
+    expect(samples.every((x) => Number.isInteger(x) && x >= 0 && x <= 10)).toBe(true);
   });
 });
 
@@ -151,6 +166,6 @@ describe('Poisson Distribution', () => {
     setSeed(123);
     const samples = rpois(100, 5);
     expect(samples).toHaveLength(100);
-    expect(samples.every(x => Number.isInteger(x) && x >= 0)).toBe(true);
+    expect(samples.every((x) => Number.isInteger(x) && x >= 0)).toBe(true);
   });
 });

@@ -20,10 +20,7 @@ const {
 describe('Central Limit Theorem', () => {
   test('sample means approach normal distribution', () => {
     setSeed(42);
-    const result = central_limit_theorem(
-      (n) => rnorm(n, 0, 1),
-      0, 1, 30, 500
-    );
+    const result = central_limit_theorem((n) => rnorm(n, 0, 1), 0, 1, 30, 500);
     expect(result.pass).toBe(true);
     expect(result.observed_mean).toBeCloseTo(0, 1);
   });
@@ -32,10 +29,7 @@ describe('Central Limit Theorem', () => {
 describe('Law of Large Numbers', () => {
   test('sample mean converges to true mean', () => {
     setSeed(42);
-    const result = law_of_large_numbers(
-      (n) => rnorm(n, 5, 2),
-      5, 1000
-    );
+    const result = law_of_large_numbers((n) => rnorm(n, 5, 2), 5, 1000);
     expect(result.pass).toBe(true);
     expect(result.sample_mean).toBeCloseTo(5, 1);
   });

@@ -60,7 +60,7 @@ function z_score(x, mu, sigma) {
 function standardize(x) {
   const m = mean(x);
   const s = std(x);
-  return x.map(xi => (xi - m) / s);
+  return x.map((xi) => (xi - m) / s);
 }
 
 function bootstrap_ci(x, statisticFn, nBootstrap = 1000, alpha = 0.05) {
@@ -70,7 +70,10 @@ function bootstrap_ci(x, statisticFn, nBootstrap = 1000, alpha = 0.05) {
     stats.push(statisticFn(resampled));
   }
   stats.sort((a, b) => a - b);
-  return [stats[Math.floor(alpha / 2 * nBootstrap)], stats[Math.floor((1 - alpha / 2) * nBootstrap)]];
+  return [
+    stats[Math.floor((alpha / 2) * nBootstrap)],
+    stats[Math.floor((1 - alpha / 2) * nBootstrap)],
+  ];
 }
 
 function log_likelihood(y, y_pred) {

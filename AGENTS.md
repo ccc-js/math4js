@@ -19,7 +19,7 @@ A JavaScript/Node.js math library. Source code does not yet exist — this is a 
 - Detailed comments in Traditional Chinese on code.
 - Subfolders containing code get a `README.md` summarizing each file.
 - `_doc/` holds: `plan.md`, `v0.x.md` versions, `todo.md`.
-- Reference: [LLM wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) for _wiki/ term explanations.
+- Reference: [LLM wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) for \_wiki/ term explanations.
 
 ## Project plan (from `_doc/plan.md`)
 

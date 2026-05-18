@@ -70,7 +70,7 @@ function law_of_large_numbers(sampleFn, trueMean, n) {
  * @returns {object}
  */
 function chebyshev_inequality(var_, k) {
-  const bound = 1.0 / (k ** 2);
+  const bound = 1.0 / k ** 2;
   return {
     pass: true,
     bound: bound,
@@ -91,8 +91,8 @@ function chebyshev_verify(samples, k) {
 
   if (sigma === 0) return { pass: true, note: 'zero variance' };
 
-  const violations = samples.filter(x => Math.abs(x - mu) >= k * sigma).length / samples.length;
-  const bound = 1.0 / (k ** 2);
+  const violations = samples.filter((x) => Math.abs(x - mu) >= k * sigma).length / samples.length;
+  const bound = 1.0 / k ** 2;
 
   return {
     pass: violations <= bound,
@@ -111,7 +111,7 @@ function markov_inequality(x) {
   if (mu <= 0) return { pass: true, note: 'mean <= 0' };
 
   for (const k of [mu * 0.5, mu, mu * 2]) {
-    const prob = x.filter(xi => xi >= k).length / x.length;
+    const prob = x.filter((xi) => xi >= k).length / x.length;
     if (prob > mu / k) {
       return { pass: false, k: k, prob: prob, bound: mu / k };
     }
@@ -133,13 +133,13 @@ function markov_verify(samples) {
   const violations = [];
   for (const k of [mu * 0.5, mu, mu * 1.5, mu * 2]) {
     if (k > 0) {
-      const obsProb = samples.filter(x => x >= k).length / samples.length;
+      const obsProb = samples.filter((x) => x >= k).length / samples.length;
       const bound = mu / k;
       violations.push(obsProb <= bound);
     }
   }
 
-  return { pass: violations.every(v => v), violations: violations };
+  return { pass: violations.every((v) => v), violations: violations };
 }
 
 /**
@@ -165,8 +165,9 @@ function bernoulli_verify(n, p, nSamples = 1000) {
   const observedVar = variance(experiments);
 
   return {
-    pass: Math.abs(observedMean - expectedMean) < 0.1 * n &&
-          Math.abs(observedVar - expectedVar) < 0.1 * n,
+    pass:
+      Math.abs(observedMean - expectedMean) < 0.1 * n &&
+      Math.abs(observedVar - expectedVar) < 0.1 * n,
     expected_mean: expectedMean,
     observed_mean: observedMean,
     expected_var: expectedVar,
@@ -182,7 +183,7 @@ function bernoulli_verify(n, p, nSamples = 1000) {
  * @returns {object}
  */
 function bayes_theorem(pA, pBgivenA, pB) {
-  const posterior = pBgivenA * pA / pB;
+  const posterior = (pBgivenA * pA) / pB;
   return {
     pass: true,
     prior: pA,
@@ -206,11 +207,11 @@ function bayes_verify(prior, likelihood) {
     return { pass: true, note: 'zero sum' };
   }
 
-  const priorNorm = prior.map(p => p / priorSum);
-  const likelihoodNorm = likelihood.map(l => l / likelihoodSum);
+  const priorNorm = prior.map((p) => p / priorSum);
+  const likelihoodNorm = likelihood.map((l) => l / likelihoodSum);
   const unnorm = priorNorm.map((p, i) => p * likelihoodNorm[i]);
   const unnormSum = unnorm.reduce((a, b) => a + b, 0);
-  const expectedPosterior = unnorm.map(u => u / unnormSum);
+  const expectedPosterior = unnorm.map((u) => u / unnormSum);
 
   return {
     pass: true,
@@ -226,8 +227,10 @@ function bayes_verify(prior, likelihood) {
  * @returns {object}
  */
 function information_entropy(p, base = 2.0) {
-  const pNorm = p.map(pi => pi / p.reduce((a, b) => a + b, 0));
-  const entropy = -pNorm.filter(pi => pi > 0).reduce((sum, pi) => sum + pi * Math.log(pi) / Math.log(base), 0);
+  const pNorm = p.map((pi) => pi / p.reduce((a, b) => a + b, 0));
+  const entropy = -pNorm
+    .filter((pi) => pi > 0)
+    .reduce((sum, pi) => sum + (pi * Math.log(pi)) / Math.log(base), 0);
 
   return {
     pass: true,
@@ -245,8 +248,10 @@ function information_entropy_verify(p, base = 2.0) {
   const pSum = p.reduce((a, b) => a + b, 0);
   if (pSum === 0) return { pass: true, note: 'zero sum' };
 
-  const pNorm = p.map(pi => pi / pSum);
-  const entropy = -pNorm.filter(pi => pi > 0).reduce((sum, pi) => sum + pi * Math.log(pi) / Math.log(base), 0);
+  const pNorm = p.map((pi) => pi / pSum);
+  const entropy = -pNorm
+    .filter((pi) => pi > 0)
+    .reduce((sum, pi) => sum + (pi * Math.log(pi)) / Math.log(base), 0);
   const maxEntropy = Math.log(pNorm.length) / Math.log(base);
   const minEntropy = 0.0;
 
@@ -268,11 +273,11 @@ function mutual_information(x, y) {
   const xSum = x.reduce((a, b) => a + b, 0);
   const ySum = y.reduce((a, b) => a + b, 0);
 
-  const px = xSum > 0 ? x.map(xi => xi / xSum) : x;
-  const py = ySum > 0 ? y.map(yi => yi / ySum) : y;
+  const px = xSum > 0 ? x.map((xi) => xi / xSum) : x;
+  const py = ySum > 0 ? y.map((yi) => yi / ySum) : y;
 
-  const hX = -px.filter(p => p > 0).reduce((sum, p) => sum + p * Math.log(p), 0);
-  const hY = -py.filter(p => p > 0).reduce((sum, p) => sum + p * Math.log(p), 0);
+  const hX = -px.filter((p) => p > 0).reduce((sum, p) => sum + p * Math.log(p), 0);
+  const hY = -py.filter((p) => p > 0).reduce((sum, p) => sum + p * Math.log(p), 0);
   const mi = hX + hY;
 
   return { pass: true, mi: mi, h_x: hX, h_y: hY };

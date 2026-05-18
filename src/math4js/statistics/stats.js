@@ -116,7 +116,7 @@ function z_score(x, mu, sigma) {
 function standardize(x) {
   const m = mean(x);
   const s = sd(x);
-  return x.map(xi => (xi - m) / s);
+  return x.map((xi) => (xi - m) / s);
 }
 
 /**

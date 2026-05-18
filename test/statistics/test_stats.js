@@ -2,7 +2,18 @@
  * 敘述統計測試
  */
 
-const { mean, median, variance, sd, covariance, correlation, quantile, iqr, summary, range_stat } = require('../../src/math4js/statistics/stats.js');
+const {
+  mean,
+  median,
+  variance,
+  sd,
+  covariance,
+  correlation,
+  quantile,
+  iqr,
+  summary,
+  range_stat,
+} = require('../../src/math4js/statistics/stats.js');
 
 describe('Descriptive Statistics', () => {
   test('mean of [1, 2, 3, 4, 5] = 3', () => {

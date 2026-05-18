@@ -2,7 +2,15 @@
  * 亂數模組測試
  */
 
-const { setSeed, getSeed, resetSeed, random, randInt, randomBatch, randIntBatch } = require('../../src/math4js/statistics/random.js');
+const {
+  setSeed,
+  getSeed,
+  resetSeed,
+  random,
+  randInt,
+  randomBatch,
+  randIntBatch,
+} = require('../../src/math4js/statistics/random.js');
 
 describe('LCG Random', () => {
   test('setSeed and getSeed', () => {
