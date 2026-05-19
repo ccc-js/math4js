@@ -9,4 +9,5 @@ export * from './algebra/index.js';
 export * from './geometry/index.js';
 export * from './calculus/index.js';
 export * from './number_theory/index.js';
+export * from './optimization/index.js';
 export * from './plot/rplot.js';
