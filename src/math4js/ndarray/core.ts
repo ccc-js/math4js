@@ -188,7 +188,6 @@ export class ndarray {
       axes = Array.from({ length: this._ndim }, (_, i) => this._ndim - 1 - i);
     }
     const newShape = axes.map(i => this._shape[i]);
-    const newStrides = computeStrides(newShape);
     const arr = new ndarray(this._data.subarray(this._offset, this._offset + this._size), this._shape, this._dtype);
     const newArr = new ndarray(new Float64Array(this._size), newShape, this._dtype);
     for (let i = 0; i < this._size; i++) {

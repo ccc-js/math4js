@@ -2,7 +2,7 @@
  * 圓與多邊形測試
  */
 
-import { Circle, Arc } from '../../src/math4js/geometry/circle.js';
+import { Circle } from '../../src/math4js/geometry/circle.js';
 import { Polygon, Triangle, Rectangle } from '../../src/math4js/geometry/polygon.js';
 import { Point2D } from '../../src/math4js/geometry/point.js';
 

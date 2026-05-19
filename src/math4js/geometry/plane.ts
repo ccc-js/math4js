@@ -4,7 +4,7 @@
  * Plane in 3D space
  */
 
-import { Point3D, Point2D } from './point.js';
+import { Point3D } from './point.js';
 import { Vec3 } from './vector.js';
 
 export class Plane {

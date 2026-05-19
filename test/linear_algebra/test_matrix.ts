@@ -168,7 +168,7 @@ describe('Matrix Decomposition', () => {
       [2, 0],
       [0, 3],
     ]);
-    const { values, vectors } = A.eig();
+    const { values } = A.eig();
     expect(values.length).toBe(2);
   });
 

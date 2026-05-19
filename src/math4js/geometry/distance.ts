@@ -5,7 +5,6 @@
  */
 
 import { Point2D, Point3D } from './point.js';
-import { Vec2 } from './vector.js';
 import { Circle } from './circle.js';
 import { Sphere } from './sphere.js';
 import { Line2D } from './line.js';

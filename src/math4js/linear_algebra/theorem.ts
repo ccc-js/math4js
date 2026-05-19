@@ -58,7 +58,6 @@ interface EigenvaluesResult {
 }
 
 function eigenvalues_theorem(matrix: number[][]): EigenvaluesResult {
-  const A = matrix;
   const trace_A = matrix.reduce((sum, row, i) => sum + row[i], 0);
   const det_A = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
 

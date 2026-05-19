@@ -7,8 +7,6 @@
 import jstat from 'jstat';
 import { random } from './random.js';
 
-const SQRT_TWO_PI = Math.sqrt(2 * Math.PI);
-
 // ============ 常態分布 (Normal) ============
 
 function dnorm(x: number, mean: number = 0, sd: number = 1): number {
@@ -121,12 +119,6 @@ function rf(n: number, df1: number, df2: number): number[] {
 }
 
 // ============ 二項分布 (Binomial) ============
-
-function logChoose(n: number, k: number): number {
-  if (k < 0 || k > n) return -Infinity;
-  if (k === 0 || k === n) return 0;
-  return jstat.combination(n, k);
-}
 
 function dbinom(k: number, n: number, p: number): number {
   return jstat.binomial.pdf(k, n, p);

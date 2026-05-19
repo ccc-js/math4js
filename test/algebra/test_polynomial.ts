@@ -17,7 +17,9 @@ describe('Polynomial', () => {
   });
 
   test('evaluates polynomial', () => {
-    const p = new Polynomial([1, -5, 6]);
+    // ascending: coeffs [a0, a1, a2] = a0 + a1*x + a2*x^2
+    // x^2 - 5x + 6 = 6 + (-5)*x + 1*x^2 -> coeffs [6, -5, 1]
+    const p = new Polynomial([6, -5, 1]);
     expect(p.eval(1)).toBe(2);
     expect(p.eval(2)).toBe(0);
     expect(p.eval(3)).toBe(0);
@@ -57,11 +59,11 @@ describe('Polynomial', () => {
   });
 
   test('computes integral', () => {
+    // ∫(2 + 0*x) dx = 2x + C -> coeffs [0, 2] (trailing zeros trimmed)
     const p = new Polynomial([2, 0]);
     const ip = p.integral(0);
     expect(ip.coeffs()[0]).toBe(0);
     expect(ip.coeffs()[1]).toBe(2);
-    expect(ip.coeffs()[2]).toBe(1);
   });
 
   test('composes polynomials', () => {

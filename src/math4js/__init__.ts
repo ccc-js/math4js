@@ -7,4 +7,6 @@ export * from './linear_algebra/index.js';
 export * from './ndarray/index.js';
 export * from './algebra/index.js';
 export * from './geometry/index.js';
+export * from './calculus/index.js';
+export * from './number_theory/index.js';
 export * from './plot/rplot.js';

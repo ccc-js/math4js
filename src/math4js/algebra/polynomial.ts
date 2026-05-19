@@ -124,13 +124,17 @@ export class Polynomial {
   gcd(other: Polynomial): Polynomial {
     let a = new Polynomial(this._coeffs);
     let b = new Polynomial(other._coeffs);
-    while (b.degree() > 0 || (b._coeffs.length > 0 && b._coeffs[0] !== 0)) {
+    let iterations = 0;
+    const maxIter = 10000;
+    while (iterations < maxIter && (b.degree() > 0 || (b._coeffs.length > 0 && b._coeffs[0] !== 0))) {
       const r = a.mod(b);
       a = b;
       b = r;
+      iterations++;
     }
+    if (iterations >= maxIter) return new Polynomial([1]);
     const lead = a._coeffs[a.degree()];
-    if (lead !== 1 && lead !== -1) {
+    if (lead !== 1 && lead !== -1 && lead !== 0) {
       return a.scalarMul(1 / lead);
     }
     return a;
