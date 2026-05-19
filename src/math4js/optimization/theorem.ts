@@ -62,7 +62,7 @@ export function weierstrassExtremeValue(
 
 export function kktConditions(
   f: (x: number[]) => number,
-  constraints: (x: number[]) => number[],
+  constraints: ((x: number[]) => number)[],
   gradF: (x: number[]) => number[],
   gradG: (x: number[]) => number[][],
   x: number[],

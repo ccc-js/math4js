@@ -11,7 +11,6 @@ export {
   momentumGradientDescent,
   adam,
   backtrackingLineSearch,
-  lagrangeMultiplier,
   isConvexFunction,
 } from './function.js';
 

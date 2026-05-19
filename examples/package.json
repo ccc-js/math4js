@@ -1,0 +1,19 @@
+{
+  "name": "math4js-examples",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "math4js": "file:.."
+  },
+  "scripts": {
+    "number_theory": "node number_theory.js",
+    "linear_algebra": "node linear_algebra.js",
+    "ndarray": "node ndarray.js",
+    "statistics": "node statistics.js",
+    "optimization": "node optimization.js",
+    "calculus": "node calculus.js",
+    "geometry": "node geometry.js",
+    "algebra": "node algebra.js",
+    "test": "npm run number_theory && npm run linear_algebra && npm run ndarray && npm run statistics && npm run optimization && npm run calculus && npm run geometry && npm run algebra"
+  }
+}
