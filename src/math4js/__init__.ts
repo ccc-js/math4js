@@ -6,4 +6,5 @@ export * from './statistics/index.js';
 export * from './linear_algebra/index.js';
 export * from './ndarray/index.js';
 export * from './algebra/index.js';
+export * from './geometry/index.js';
 export * from './plot/rplot.js';
